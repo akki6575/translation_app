@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const lang = {
     "am-ET": "Amharic",
@@ -126,28 +127,25 @@ class Translator extends Component {
   }
 
   handleExchange = () => {
-    const { fromText, toText, fromLanguage, toLanguage } = this.state;
+    const { fromLanguage, toLanguage } = this.state;
     this.setState({
-      fromText: toText,
-      toText: fromText,
       fromLanguage: toLanguage,
       toLanguage: fromLanguage
     });
   };
 
-  handleTranslate = () => {
+  handleTranslate = async () => {
     const { fromText, fromLanguage, toLanguage } = this.state;
     this.setState({ loading: true });
     const url = `https://api.mymemory.translated.net/get?q=${fromText}&langpair=${fromLanguage}|${toLanguage}`;
-
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        this.setState({
-          toText: data.responseData.translatedText,
-          loading: false
-        });
-      });
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    console.log(data);
+    this.setState({
+      toText: data.responseData.translatedText,
+      loading: false,
+    });
   };
 
   handleIconClick = (target, id) => {
@@ -161,7 +159,9 @@ class Translator extends Component {
       } else {
         this.copyContent(toText);
       }
-    } else if (target.classList.contains('fa-volume-high')) {
+    } 
+    
+    else if (target.classList.contains('fa-volume-high')) {
       if (id === 'from') {
         this.utterText(fromText, fromLanguage);
       } else {
@@ -174,10 +174,10 @@ class Translator extends Component {
     const { fromText, toText, fromLanguage, toLanguage, languages, loading } = this.state;
 
     return (
-      <>
-        <div className="wrapper">
-          <h1 className='heading'>Translating App</h1>
-          <div className="text-input">
+      <div className="app">
+        <h1 className='heading'>Translating App</h1>
+        <div className="translation-box">
+          <div className="input-box">
             <textarea
               name="from"
               className="from-text"
@@ -201,13 +201,13 @@ class Translator extends Component {
                   id="from"
                   onClick={() => this.utterText(fromText, fromLanguage)}
                 >
-                  Speak From Text
+                  <i className="fa fa-volume-high"></i>
                 </button>
                 <button
                   id="from"
                   onClick={() => this.copyContent(fromText)}
                 >
-                  Copy From Text
+                  <i className="fa fa-copy"></i>
                 </button>
               </div>
               <select
@@ -222,7 +222,7 @@ class Translator extends Component {
               </select>
             </li>
             <li className="exchange" onClick={this.handleExchange}>
-              <button>Swap</button>
+              <i className="fa-solid fa-exchange-alt"></i>
             </li>
             <li className="row to">
               <select
@@ -240,22 +240,22 @@ class Translator extends Component {
                   id="to"
                   onClick={() => this.copyContent(toText)}
                 >
-                  Copy To Text
+                  <i className="fa fa-copy"></i>
                 </button>
                 <button
                   id="to"
                   onClick={() => this.utterText(toText, toLanguage)}
                 >
-                  Speak Translated Text
+                  <i className="fa fa-volume-high"></i>
                 </button>
               </div>
             </li>
           </ul>
         </div>
-        <button onClick={this.handleTranslate} disabled={loading}>
+        <button className="translate-button" onClick={this.handleTranslate} disabled={loading}>
           {loading ? 'Translating...' : 'Translate Text'}
         </button>
-      </>
+      </div>
     );
   }
 }
